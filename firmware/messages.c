@@ -71,6 +71,9 @@ static const struct MessagesMap_t MessagesMap[] = {
 	{'n', 'i', MessageType_MessageType_EstimateTxSize,		EstimateTxSize_fields,		(void (*)(void *))fsm_msgEstimateTxSize},
 	{'n', 'i', MessageType_MessageType_RecoveryDevice,		RecoveryDevice_fields,		(void (*)(void *))fsm_msgRecoveryDevice},
 	{'n', 'i', MessageType_MessageType_WordAck,				WordAck_fields,				(void (*)(void *))fsm_msgWordAck},
+	{'n', 'i', MessageType_MessageType_EthereumGetAddress,		EthereumGetAddress_fields,	(void (*)(void *))fsm_msgEthereumGetAddress},
+	{'n', 'i', MessageType_MessageType_EthereumSignTx,		EthereumSignTx_fields,		(void (*)(void *))fsm_msgEthereumSignTx},
+	{'n', 'i', MessageType_MessageType_EthereumTxAck,		EthereumTxAck_fields,		(void (*)(void *))fsm_msgEthereumTxAck},
 	// out messages
 	{'n', 'o', MessageType_MessageType_Success,				Success_fields,				0},
 	{'n', 'o', MessageType_MessageType_Failure,				Failure_fields,				0},
@@ -92,6 +95,8 @@ static const struct MessagesMap_t MessagesMap[] = {
 	{'n', 'o', MessageType_MessageType_PassphraseRequest,	PassphraseRequest_fields,	0},
 	{'n', 'o', MessageType_MessageType_TxSize,				TxSize_fields,				0},
 	{'n', 'o', MessageType_MessageType_WordRequest,			WordRequest_fields,			0},
+	{'n', 'o', MessageType_MessageType_EthereumAddress,		EthereumAddress_fields,		0},
+	{'n', 'o', MessageType_MessageType_EthereumTxRequest,		EthereumTxRequest_fields,		0},
 #if DEBUG_LINK
 	// debug in messages
 //	{'d', 'i', MessageType_MessageType_DebugLinkDecision,	DebugLinkDecision_fields,	(void (*)(void *))fsm_msgDebugLinkDecision},
