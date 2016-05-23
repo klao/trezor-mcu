@@ -61,6 +61,11 @@ typedef enum _MessageType {
     MessageType_MessageType_SignIdentity = 53,
     MessageType_MessageType_SignedIdentity = 54,
     MessageType_MessageType_GetFeatures = 55,
+    MessageType_MessageType_EthereumGetAddress = 56,
+    MessageType_MessageType_EthereumAddress = 57,
+    MessageType_MessageType_EthereumSignTx = 58,
+    MessageType_MessageType_EthereumTxRequest = 59,
+    MessageType_MessageType_EthereumTxAck = 60,
     MessageType_MessageType_DebugLinkDecision = 100,
     MessageType_MessageType_DebugLinkGetState = 101,
     MessageType_MessageType_DebugLinkState = 102,
@@ -342,6 +347,102 @@ typedef struct _EstimateTxSize {
     bool has_coin_name;
     char coin_name[17];
 } EstimateTxSize;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[20];
+} EthereumAddress_address_t;
+
+typedef struct _EthereumAddress {
+    EthereumAddress_address_t address;
+} EthereumAddress;
+
+typedef struct _EthereumGetAddress {
+    size_t address_n_count;
+    uint32_t address_n[8];
+    bool has_show_display;
+    bool show_display;
+} EthereumGetAddress;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumSignTx_nonce_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumSignTx_gas_price_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumSignTx_gas_limit_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[20];
+} EthereumSignTx_to_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumSignTx_value_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[1024];
+} EthereumSignTx_data_initial_chunk_t;
+
+typedef struct _EthereumSignTx {
+    size_t address_n_count;
+    uint32_t address_n[8];
+    bool has_nonce;
+    EthereumSignTx_nonce_t nonce;
+    bool has_gas_price;
+    EthereumSignTx_gas_price_t gas_price;
+    bool has_gas_limit;
+    EthereumSignTx_gas_limit_t gas_limit;
+    bool has_to;
+    EthereumSignTx_to_t to;
+    bool has_value;
+    EthereumSignTx_value_t value;
+    bool has_data_initial_chunk;
+    EthereumSignTx_data_initial_chunk_t data_initial_chunk;
+    bool has_data_length;
+    uint32_t data_length;
+} EthereumSignTx;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[1024];
+} EthereumTxAck_data_chunk_t;
+
+typedef struct _EthereumTxAck {
+    bool has_data_chunk;
+    EthereumTxAck_data_chunk_t data_chunk;
+} EthereumTxAck;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumTxRequest_signature_r_t;
+
+typedef struct {
+    size_t size;
+    uint8_t bytes[32];
+} EthereumTxRequest_signature_s_t;
+
+typedef struct _EthereumTxRequest {
+    bool has_data_length;
+    uint32_t data_length;
+    bool has_signature_v;
+    uint32_t signature_v;
+    bool has_signature_r;
+    EthereumTxRequest_signature_r_t signature_r;
+    bool has_signature_s;
+    EthereumTxRequest_signature_s_t signature_s;
+} EthereumTxRequest;
 
 typedef struct _Failure {
     bool has_code;
@@ -681,7 +782,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define GetPublicKey_init_default                {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, "", false, 0}
 #define PublicKey_init_default                   {HDNodeType_init_default, false, ""}
 #define GetAddress_init_default                  {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, "Bitcoin", false, 0, false, MultisigRedeemScriptType_init_default}
+#define EthereumGetAddress_init_default          {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, 0}
 #define Address_init_default                     {""}
+#define EthereumAddress_init_default             {{0, {0}}}
 #define WipeDevice_init_default                  {0}
 #define LoadDevice_init_default                  {false, "", false, HDNodeType_init_default, false, "", false, 0, false, "english", false, "", false, 0}
 #define ResetDevice_init_default                 {false, 0, false, 256u, false, 0, false, 0, false, "english", false, ""}
@@ -705,6 +808,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define SimpleSignTx_init_default                {0, {}, 0, {}, 0, {}, false, "Bitcoin", false, 1u, false, 0u}
 #define TxRequest_init_default                   {false, (RequestType)0, false, TxRequestDetailsType_init_default, false, TxRequestSerializedType_init_default}
 #define TxAck_init_default                       {false, TransactionType_init_default}
+#define EthereumSignTx_init_default              {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, 0}
+#define EthereumTxRequest_init_default           {false, 0, false, 0, false, {0, {0}}, false, {0, {0}}}
+#define EthereumTxAck_init_default               {false, {0, {0}}}
 #define SignIdentity_init_default                {false, IdentityType_init_default, false, {0, {0}}, false, "", false, ""}
 #define SignedIdentity_init_default              {false, "", false, {0, {0}}, false, {0, {0}}}
 #define FirmwareErase_init_default               {0}
@@ -735,7 +841,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define GetPublicKey_init_zero                   {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, "", false, 0}
 #define PublicKey_init_zero                      {HDNodeType_init_zero, false, ""}
 #define GetAddress_init_zero                     {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, "", false, 0, false, MultisigRedeemScriptType_init_zero}
+#define EthereumGetAddress_init_zero             {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, 0}
 #define Address_init_zero                        {""}
+#define EthereumAddress_init_zero                {{0, {0}}}
 #define WipeDevice_init_zero                     {0}
 #define LoadDevice_init_zero                     {false, "", false, HDNodeType_init_zero, false, "", false, 0, false, "", false, "", false, 0}
 #define ResetDevice_init_zero                    {false, 0, false, 0, false, 0, false, 0, false, "", false, ""}
@@ -759,6 +867,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define SimpleSignTx_init_zero                   {0, {}, 0, {}, 0, {}, false, "", false, 0, false, 0}
 #define TxRequest_init_zero                      {false, (RequestType)0, false, TxRequestDetailsType_init_zero, false, TxRequestSerializedType_init_zero}
 #define TxAck_init_zero                          {false, TransactionType_init_zero}
+#define EthereumSignTx_init_zero                 {0, {0, 0, 0, 0, 0, 0, 0, 0}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, {0, {0}}, false, 0}
+#define EthereumTxRequest_init_zero              {false, 0, false, 0, false, {0, {0}}, false, {0, {0}}}
+#define EthereumTxAck_init_zero                  {false, {0, {0}}}
 #define SignIdentity_init_zero                   {false, IdentityType_init_zero, false, {0, {0}}, false, "", false, ""}
 #define SignedIdentity_init_zero                 {false, "", false, {0, {0}}, false, {0, {0}}}
 #define FirmwareErase_init_zero                  {0}
@@ -819,6 +930,22 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define EstimateTxSize_outputs_count_tag         1
 #define EstimateTxSize_inputs_count_tag          2
 #define EstimateTxSize_coin_name_tag             3
+#define EthereumAddress_address_tag              1
+#define EthereumGetAddress_address_n_tag         1
+#define EthereumGetAddress_show_display_tag      2
+#define EthereumSignTx_address_n_tag             1
+#define EthereumSignTx_nonce_tag                 2
+#define EthereumSignTx_gas_price_tag             3
+#define EthereumSignTx_gas_limit_tag             4
+#define EthereumSignTx_to_tag                    5
+#define EthereumSignTx_value_tag                 6
+#define EthereumSignTx_data_initial_chunk_tag    7
+#define EthereumSignTx_data_length_tag           8
+#define EthereumTxAck_data_chunk_tag             1
+#define EthereumTxRequest_data_length_tag        1
+#define EthereumTxRequest_signature_v_tag        2
+#define EthereumTxRequest_signature_r_tag        3
+#define EthereumTxRequest_signature_s_tag        4
 #define Failure_code_tag                         1
 #define Failure_message_tag                      2
 #define Features_vendor_tag                      1
@@ -932,7 +1059,9 @@ extern const pb_field_t Entropy_fields[2];
 extern const pb_field_t GetPublicKey_fields[4];
 extern const pb_field_t PublicKey_fields[3];
 extern const pb_field_t GetAddress_fields[5];
+extern const pb_field_t EthereumGetAddress_fields[3];
 extern const pb_field_t Address_fields[2];
+extern const pb_field_t EthereumAddress_fields[2];
 extern const pb_field_t WipeDevice_fields[1];
 extern const pb_field_t LoadDevice_fields[8];
 extern const pb_field_t ResetDevice_fields[7];
@@ -956,6 +1085,9 @@ extern const pb_field_t SignTx_fields[6];
 extern const pb_field_t SimpleSignTx_fields[7];
 extern const pb_field_t TxRequest_fields[4];
 extern const pb_field_t TxAck_fields[2];
+extern const pb_field_t EthereumSignTx_fields[9];
+extern const pb_field_t EthereumTxRequest_fields[5];
+extern const pb_field_t EthereumTxAck_fields[2];
 extern const pb_field_t SignIdentity_fields[5];
 extern const pb_field_t SignedIdentity_fields[4];
 extern const pb_field_t FirmwareErase_fields[1];
@@ -988,7 +1120,9 @@ extern const pb_field_t DebugLinkLog_fields[4];
 #define GetPublicKey_size                        84
 #define PublicKey_size                           (121 + HDNodeType_size)
 #define GetAddress_size                          (75 + MultisigRedeemScriptType_size)
+#define EthereumGetAddress_size                  50
 #define Address_size                             38
+#define EthereumAddress_size                     22
 #define WipeDevice_size                          0
 #define LoadDevice_size                          (320 + HDNodeType_size)
 #define ResetDevice_size                         66
@@ -1012,6 +1146,9 @@ extern const pb_field_t DebugLinkLog_fields[4];
 #define SimpleSignTx_size                        (31 + 0*TxInputType_size + 0*TxOutputType_size + 0*TransactionType_size)
 #define TxRequest_size                           (18 + TxRequestDetailsType_size + TxRequestSerializedType_size)
 #define TxAck_size                               (6 + TransactionType_size)
+#define EthereumSignTx_size                      1239
+#define EthereumTxRequest_size                   80
+#define EthereumTxAck_size                       1027
 #define SignIdentity_size                        (558 + IdentityType_size)
 #define SignedIdentity_size                      140
 #define FirmwareErase_size                       0
