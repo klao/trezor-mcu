@@ -46,6 +46,7 @@
 #include "ripemd160.h"
 #include "curves.h"
 #include "secp256k1.h"
+#include "ethereum.h"
 
 // message methods
 
@@ -415,18 +416,30 @@ void fsm_msgCancel(Cancel *msg)
 	(void)msg;
 	recovery_abort();
 	signing_abort();
+	ethereum_signing_abort();
 }
 
 void fsm_msgEthereumSignTx(EthereumSignTx *msg)
 {
-	(void)msg;
-	fsm_sendFailure(FailureType_Failure_Other, "Unsupported feature");
+	if (!storage_isInitialized()) {
+		fsm_sendFailure(FailureType_Failure_NotInitialized, "Device not initialized");
+		return;
+	}
+
+	if (!protectPin(true)) {
+		layoutHome();
+		return;
+	}
+
+	const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n, msg->address_n_count);
+	if (!node) return;
+
+	ethereum_signing_init(msg, node);
 }
 
 void fsm_msgEthereumTxAck(EthereumTxAck *msg)
 {
-	(void)msg;
-	fsm_sendFailure(FailureType_Failure_Other, "Unsupported feature");
+	ethereum_signing_txack(msg);
 }
 
 void fsm_msgCipherKeyValue(CipherKeyValue *msg)
