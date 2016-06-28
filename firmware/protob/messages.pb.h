@@ -66,11 +66,18 @@ typedef enum _MessageType {
     MessageType_MessageType_EthereumSignTx = 58,
     MessageType_MessageType_EthereumTxRequest = 59,
     MessageType_MessageType_EthereumTxAck = 60,
+    MessageType_MessageType_GetECDHSessionKey = 61,
+    MessageType_MessageType_ECDHSessionKey = 62,
+    MessageType_MessageType_SetU2FCounter = 63,
     MessageType_MessageType_DebugLinkDecision = 100,
     MessageType_MessageType_DebugLinkGetState = 101,
     MessageType_MessageType_DebugLinkState = 102,
     MessageType_MessageType_DebugLinkStop = 103,
-    MessageType_MessageType_DebugLinkLog = 104
+    MessageType_MessageType_DebugLinkLog = 104,
+    MessageType_MessageType_DebugLinkMemoryRead = 110,
+    MessageType_MessageType_DebugLinkMemory = 111,
+    MessageType_MessageType_DebugLinkMemoryWrite = 112,
+    MessageType_MessageType_DebugLinkFlashErase = 113
 } MessageType;
 
 /* Struct definitions */
@@ -195,6 +202,11 @@ typedef struct _DebugLinkDecision {
     bool yes_no;
 } DebugLinkDecision;
 
+typedef struct _DebugLinkFlashErase {
+    bool has_sector;
+    uint32_t sector;
+} DebugLinkFlashErase;
+
 typedef struct _DebugLinkLog {
     bool has_level;
     uint32_t level;
@@ -203,6 +215,25 @@ typedef struct _DebugLinkLog {
     bool has_text;
     char text[256];
 } DebugLinkLog;
+
+typedef struct _DebugLinkMemory {
+    pb_callback_t memory;
+} DebugLinkMemory;
+
+typedef struct _DebugLinkMemoryRead {
+    bool has_address;
+    uint32_t address;
+    bool has_length;
+    uint32_t length;
+} DebugLinkMemoryRead;
+
+typedef struct _DebugLinkMemoryWrite {
+    bool has_address;
+    uint32_t address;
+    pb_callback_t memory;
+    bool has_flash;
+    bool flash;
+} DebugLinkMemoryWrite;
 
 typedef struct {
     size_t size;
@@ -274,6 +305,10 @@ typedef struct _DecryptedMessage {
     bool has_address;
     char address[36];
 } DecryptedMessage;
+
+typedef struct _ECDHSessionKey {
+    pb_callback_t session_key;
+} ECDHSessionKey;
 
 typedef struct {
     size_t size;
@@ -518,6 +553,13 @@ typedef struct _GetAddress {
     MultisigRedeemScriptType multisig;
 } GetAddress;
 
+typedef struct _GetECDHSessionKey {
+    bool has_identity;
+    IdentityType identity;
+    pb_callback_t peer_public_key;
+    pb_callback_t ecdsa_curve_name;
+} GetECDHSessionKey;
+
 typedef struct _GetEntropy {
     uint32_t size;
 } GetEntropy;
@@ -619,6 +661,11 @@ typedef struct _ResetDevice {
     bool has_label;
     char label[33];
 } ResetDevice;
+
+typedef struct _SetU2FCounter {
+    bool has_u2f_counter;
+    uint32_t u2f_counter;
+} SetU2FCounter;
 
 typedef struct {
     size_t size;
@@ -813,6 +860,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define EthereumTxAck_init_default               {false, {0, {0}}}
 #define SignIdentity_init_default                {false, IdentityType_init_default, false, {0, {0}}, false, "", false, ""}
 #define SignedIdentity_init_default              {false, "", false, {0, {0}}, false, {0, {0}}}
+#define GetECDHSessionKey_init_default           {false, IdentityType_init_default, {{NULL}, NULL}, {{NULL}, NULL}}
+#define ECDHSessionKey_init_default              {{{NULL}, NULL}}
+#define SetU2FCounter_init_default               {false, 0}
 #define FirmwareErase_init_default               {0}
 #define FirmwareUpload_init_default              {{0, {0}}}
 #define DebugLinkDecision_init_default           {0}
@@ -820,6 +870,10 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define DebugLinkState_init_default              {false, {0, {0}}, false, "", false, "", false, "", false, HDNodeType_init_default, false, 0, false, "", false, {0, {0}}, false, "", false, 0}
 #define DebugLinkStop_init_default               {0}
 #define DebugLinkLog_init_default                {false, 0, false, "", false, ""}
+#define DebugLinkMemoryRead_init_default         {false, 0, false, 0}
+#define DebugLinkMemory_init_default             {{{NULL}, NULL}}
+#define DebugLinkMemoryWrite_init_default        {false, 0, {{NULL}, NULL}, false, 0}
+#define DebugLinkFlashErase_init_default         {false, 0}
 #define Initialize_init_zero                     {0}
 #define GetFeatures_init_zero                    {0}
 #define Features_init_zero                       {false, "", false, 0, false, 0, false, 0, false, 0, false, "", false, 0, false, 0, false, "", false, "", 0, {CoinType_init_zero, CoinType_init_zero, CoinType_init_zero, CoinType_init_zero, CoinType_init_zero, CoinType_init_zero}, false, 0, false, {0, {0}}, false, {0, {0}}, false, 0, false, 0, false, 0}
@@ -872,6 +926,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define EthereumTxAck_init_zero                  {false, {0, {0}}}
 #define SignIdentity_init_zero                   {false, IdentityType_init_zero, false, {0, {0}}, false, "", false, ""}
 #define SignedIdentity_init_zero                 {false, "", false, {0, {0}}, false, {0, {0}}}
+#define GetECDHSessionKey_init_zero              {false, IdentityType_init_zero, {{NULL}, NULL}, {{NULL}, NULL}}
+#define ECDHSessionKey_init_zero                 {{{NULL}, NULL}}
+#define SetU2FCounter_init_zero                  {false, 0}
 #define FirmwareErase_init_zero                  {0}
 #define FirmwareUpload_init_zero                 {{0, {0}}}
 #define DebugLinkDecision_init_zero              {0}
@@ -879,6 +936,10 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define DebugLinkState_init_zero                 {false, {0, {0}}, false, "", false, "", false, "", false, HDNodeType_init_zero, false, 0, false, "", false, {0, {0}}, false, "", false, 0}
 #define DebugLinkStop_init_zero                  {0}
 #define DebugLinkLog_init_zero                   {false, 0, false, "", false, ""}
+#define DebugLinkMemoryRead_init_zero            {false, 0, false, 0}
+#define DebugLinkMemory_init_zero                {{{NULL}, NULL}}
+#define DebugLinkMemoryWrite_init_zero           {false, 0, {{NULL}, NULL}, false, 0}
+#define DebugLinkFlashErase_init_zero            {false, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define Address_address_tag                      1
@@ -898,9 +959,16 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define CipherKeyValue_iv_tag                    7
 #define CipheredKeyValue_value_tag               1
 #define DebugLinkDecision_yes_no_tag             1
+#define DebugLinkFlashErase_sector_tag           1
 #define DebugLinkLog_level_tag                   1
 #define DebugLinkLog_bucket_tag                  2
 #define DebugLinkLog_text_tag                    3
+#define DebugLinkMemory_memory_tag               1
+#define DebugLinkMemoryRead_address_tag          1
+#define DebugLinkMemoryRead_length_tag           2
+#define DebugLinkMemoryWrite_address_tag         1
+#define DebugLinkMemoryWrite_memory_tag          2
+#define DebugLinkMemoryWrite_flash_tag           3
 #define DebugLinkState_layout_tag                1
 #define DebugLinkState_pin_tag                   2
 #define DebugLinkState_matrix_tag                3
@@ -917,6 +985,7 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define DecryptMessage_hmac_tag                  4
 #define DecryptedMessage_message_tag             1
 #define DecryptedMessage_address_tag             2
+#define ECDHSessionKey_session_key_tag           1
 #define EncryptMessage_pubkey_tag                1
 #define EncryptMessage_message_tag               2
 #define EncryptMessage_display_only_tag          3
@@ -970,6 +1039,9 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define GetAddress_coin_name_tag                 2
 #define GetAddress_show_display_tag              3
 #define GetAddress_multisig_tag                  4
+#define GetECDHSessionKey_identity_tag           1
+#define GetECDHSessionKey_peer_public_key_tag    2
+#define GetECDHSessionKey_ecdsa_curve_name_tag   3
 #define GetEntropy_size_tag                      1
 #define GetPublicKey_address_n_tag               1
 #define GetPublicKey_ecdsa_curve_name_tag        2
@@ -1004,6 +1076,7 @@ extern const uint32_t SimpleSignTx_lock_time_default;
 #define ResetDevice_pin_protection_tag           4
 #define ResetDevice_language_tag                 5
 #define ResetDevice_label_tag                    6
+#define SetU2FCounter_u2f_counter_tag            1
 #define SignIdentity_identity_tag                1
 #define SignIdentity_challenge_hidden_tag        2
 #define SignIdentity_challenge_visual_tag        3
@@ -1090,6 +1163,9 @@ extern const pb_field_t EthereumTxRequest_fields[5];
 extern const pb_field_t EthereumTxAck_fields[2];
 extern const pb_field_t SignIdentity_fields[5];
 extern const pb_field_t SignedIdentity_fields[4];
+extern const pb_field_t GetECDHSessionKey_fields[4];
+extern const pb_field_t ECDHSessionKey_fields[2];
+extern const pb_field_t SetU2FCounter_fields[2];
 extern const pb_field_t FirmwareErase_fields[1];
 extern const pb_field_t FirmwareUpload_fields[2];
 extern const pb_field_t DebugLinkDecision_fields[2];
@@ -1097,6 +1173,10 @@ extern const pb_field_t DebugLinkGetState_fields[1];
 extern const pb_field_t DebugLinkState_fields[11];
 extern const pb_field_t DebugLinkStop_fields[1];
 extern const pb_field_t DebugLinkLog_fields[4];
+extern const pb_field_t DebugLinkMemoryRead_fields[3];
+extern const pb_field_t DebugLinkMemory_fields[2];
+extern const pb_field_t DebugLinkMemoryWrite_fields[4];
+extern const pb_field_t DebugLinkFlashErase_fields[2];
 
 /* Maximum encoded size of messages (where known) */
 #define Initialize_size                          0
@@ -1151,6 +1231,7 @@ extern const pb_field_t DebugLinkLog_fields[4];
 #define EthereumTxAck_size                       1027
 #define SignIdentity_size                        (558 + IdentityType_size)
 #define SignedIdentity_size                      140
+#define SetU2FCounter_size                       6
 #define FirmwareErase_size                       0
 #define FirmwareUpload_size                      2
 #define DebugLinkDecision_size                   2
@@ -1158,6 +1239,8 @@ extern const pb_field_t DebugLinkLog_fields[4];
 #define DebugLinkState_size                      (1468 + HDNodeType_size)
 #define DebugLinkStop_size                       0
 #define DebugLinkLog_size                        300
+#define DebugLinkMemoryRead_size                 12
+#define DebugLinkFlashErase_size                 6
 
 #ifdef __cplusplus
 } /* extern "C" */
